@@ -1,0 +1,28 @@
+FROM gradle:7.2.0-jdk11 as gradle
+WORKDIR /app
+COPY ./settings.gradle ./settings.gradle
+COPY ./build.gradle ./build.gradle
+COPY src ./src/
+RUN gradle --no-daemon build
+
+
+FROM ghcr.io/graalvm/graalvm-ce:21.2.0 as graalvm
+WORKDIR /app
+RUN gu install native-image
+COPY --from=gradle /app/build/libs/graalvm-sample-rest-service-1.0.0-all.jar ./graalvm-sample-rest-service.jar
+RUN native-image \
+  -H:+ReportUnsupportedElementsAtRuntime \
+  -H:TraceClassInitialization=true \
+  --verbose \
+  --enable-http \
+  --static \
+  --no-fallback \
+  --initialize-at-build-time=org.eclipse.jetty,org.slf4j,javax.servlet,org.sparkjava \
+  -jar graalvm-sample-rest-service.jar \
+  graalvm-sample-rest-service
+
+
+FROM scratch
+COPY --from=graalvm /app/graalvm-sample-rest-service /app/graalvm-sample-rest-service
+EXPOSE 4567
+CMD ["./app/graalvm-sample-rest-service"]

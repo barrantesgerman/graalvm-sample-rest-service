@@ -1,0 +1,12 @@
+FROM gradle:7.2.0-jdk11 as gradle
+WORKDIR /app
+COPY ./settings.gradle ./settings.gradle
+COPY ./build.gradle ./build.gradle
+COPY src ./src/
+RUN gradle --no-daemon build
+
+
+FROM openjdk:11-jre-slim-buster
+COPY --from=gradle /app/build/libs/graalvm-sample-rest-service-1.0.0-all.jar /app/graalvm-sample-rest-service.jar
+EXPOSE 4567
+CMD ["java", "-jar", "/app/graalvm-sample-rest-service.jar"]
