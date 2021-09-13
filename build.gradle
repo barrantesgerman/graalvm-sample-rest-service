@@ -2,6 +2,7 @@ plugins {
     id 'java'
     id 'application'
     id 'com.github.johnrengelman.shadow' version '7.0.0'
+    id 'org.graalvm.buildtools.native' version '0.9.5'
 }
 
 group = 'com.example'
@@ -28,4 +29,18 @@ jar {
     }
     sourceCompatibility = JavaVersion.VERSION_11
     targetCompatibility = JavaVersion.VERSION_11
+}
+
+graalvmNative {
+    binaries {
+        main {
+            imageName = 'graalvm-sample-rest-service'
+            mainClass = 'com.example.App'
+            //verbose = true
+            fallback = false
+            buildArgs.add('--enable-http')
+            buildArgs.add('--static')
+            buildArgs.add('--initialize-at-build-time=org.eclipse.jetty,org.slf4j,javax.servlet,org.sparkjava')
+        }
+    }
 }
