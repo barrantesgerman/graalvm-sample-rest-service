@@ -38,8 +38,11 @@ graalvmNative {
             mainClass = 'com.example.App'
             //verbose = true
             fallback = false
+            buildArgs.add('-H:+ReportUnsupportedElementsAtRuntime')
+            buildArgs.add('-H:TraceClassInitialization=true')
             buildArgs.add('--enable-http')
             buildArgs.add('--static')
+            buildArgs.add('--no-fallback')
             buildArgs.add('--initialize-at-build-time=org.eclipse.jetty,org.slf4j,javax.servlet,org.sparkjava')
         }
     }
